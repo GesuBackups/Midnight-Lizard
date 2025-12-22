@@ -25,8 +25,8 @@
 ✔ Switch between websites blacklist and whitelist modes  
 ✔ Use Simplified mode to improve performance on heavy websites  
 ✔ Use keyboard shortcuts to toggle extension  
-  ⮚ on current website: Alt+Shift+L  
-  ⮚ globally: Alt+Shift+M  
+  ⮚ on current website: Alt+Shift+L  
+  ⮚ globally: Alt+Shift+M  
 
 ---
 
