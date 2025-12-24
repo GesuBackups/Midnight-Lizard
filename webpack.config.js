@@ -4,11 +4,14 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 
 module.exports = (env, args) => {
     /**
-     * @param {string} entryName file path to the source entry .ts file
-     * @param {string} bundleName file name of the bundle
+     * Create a webpack config for a single bundle.
+     *
+     * @param {string|string[]} entryPath - Path or array of paths to the source entry .ts file(s). Use an array to enforce load order (e.g. prepend shims).
+     * @param {string} bundleName - Output filename for the bundle.
+     * @returns {import('webpack').Configuration}
      * */
-    const sharedConfig = (entryName, bundleName) => ({
-        entry: entryName,
+    const sharedConfig = (entryPath, bundleName) => ({
+        entry: entryPath,
         plugins: env && env.useBundleAnalyzer ? [
             new BundleAnalyzerPlugin({
                 analyzerPort: 8000 + Math.round(Math.random() * 1000)
@@ -42,7 +45,10 @@ module.exports = (env, args) => {
         'popup.js');
 
     const backgroundPageConfig = sharedConfig(
-        './ts/Chrome/ChromeBackgroundPageStarter.ts',
+        [
+            './ts/BackgroundPage/DocumentShim.ts',
+            './ts/Chrome/ChromeBackgroundPageStarter.ts'
+        ],
         'background-page.js');
 
     const pageScriptConfig = sharedConfig(

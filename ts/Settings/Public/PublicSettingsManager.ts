@@ -10,6 +10,7 @@ import { IMatchPatternProcessor } from "../MatchPatternProcessor";
 import { IRecommendations } from "../Recommendations";
 import { injectable } from "../../Utils/DI";
 import { ITranslationAccessor } from "../../i18n/ITranslationAccessor";
+import { IWindowManager } from "../../Utils/IWindowManager";
 
 declare type PublicSchemesStorage = { publicSchemeIds: PublicSchemeId[] };
 
@@ -41,9 +42,11 @@ class PublicSettingsManager extends BaseSettingsManager implements IPublicSettin
         settingsBus: ISettingsBus,
         matchPatternProcessor: IMatchPatternProcessor,
         i18n: ITranslationAccessor,
-        rec: IRecommendations)
+        rec: IRecommendations,
+        windowManager: IWindowManager
+    )
     {
-        super(rootDocument, app, storageManager, settingsBus, matchPatternProcessor, i18n, rec);
+        super(rootDocument, app, storageManager, settingsBus, matchPatternProcessor, i18n, rec, windowManager);
         this.isInit = true
         storageManager.onStorageChanged.addListener(this.onStorageChanged, this);
     }

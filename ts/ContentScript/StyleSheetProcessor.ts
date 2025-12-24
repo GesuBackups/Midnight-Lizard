@@ -13,6 +13,7 @@ import { CssStyleKeys, CssStyle } from "./CssStyle";
 import * as x from "../Utils/RegExp";
 import { FetchExternalCss, LocalMessageToContent, MessageType } from '../Settings/Messages';
 import { IContentMessageBus } from './IContentMessageBus';
+import { IWindowManager } from "../Utils/IWindowManager";
 
 type CssPromise = Promise<HandledPromiseResult<void>>;
 type ArgEvent<TArgs> = ArgumentedEvent<TArgs>;
@@ -101,7 +102,8 @@ class StyleSheetProcessor implements IStyleSheetProcessor
         settingsManager: IBaseSettingsManager,
         private readonly _doc: Document,
         private readonly _app: IApplicationSettings,
-        private readonly _msgBus: IContentMessageBus
+        private readonly _msgBus: IContentMessageBus,
+        private readonly _windowManager: IWindowManager
     )
     {
         this._css = css as any;
@@ -129,7 +131,7 @@ class StyleSheetProcessor implements IStyleSheetProcessor
         //  this._excludeStylesRegExp = this.compileExcludeStylesRegExp();
         this._includeStylesRegExp = this.compileIncludeStylesRegExp();
         _msgBus.onMessage.addListener(this.onMessageFromBackgroundPage, this);
-        window.setInterval(() =>
+        _windowManager.setInterval(() =>
         {
             if (this._storageIsAvailable)
             {
@@ -318,7 +320,7 @@ class StyleSheetProcessor implements IStyleSheetProcessor
                             }
                             else if (rule instanceof CSSImportRule)
                             {
-                                styleSheets.push(rule.styleSheet);
+                                styleSheets.push(rule.styleSheet!);
                             }
                             else if (rule instanceof CSSMediaRule)
                             {

@@ -94,14 +94,14 @@ export class FirefoxThemeProcessor implements IThemeProcessor
                                 const theme: browser._manifest.ThemeType = { colors: {} };
                                 if (mainVersion < 59)
                                 {
-                                    Object.assign(theme.colors, {
+                                    Object.assign(theme.colors!, {
                                         accentcolor: darkBgColor.color!,
                                         textcolor: darkTextColor.color!
                                     });
 
                                     if (mainVersion >= 57)
                                     {
-                                        Object.assign(theme.colors, {
+                                        Object.assign(theme.colors!, {
                                             toolbar_text: lightTextColor.color,
                                         });
                                     }
@@ -114,7 +114,7 @@ export class FirefoxThemeProcessor implements IThemeProcessor
                                 }
                                 if (mainVersion >= 57)
                                 {
-                                    Object.assign(theme.colors, {
+                                    Object.assign(theme.colors!, {
                                         toolbar: buttonColor.color,
                                         toolbar_field: midBgColor.color,
                                         toolbar_field_text: midTextColor.color
@@ -122,7 +122,7 @@ export class FirefoxThemeProcessor implements IThemeProcessor
                                 }
                                 if (mainVersion >= 58)
                                 {
-                                    Object.assign(theme.colors, {
+                                    Object.assign(theme.colors!, {
                                         toolbar_bottom_separator: lightBorderColor.color,
                                         toolbar_top_separator: darkBorderColor.color,
                                         toolbar_vertical_separator: darkBorderColor.color
@@ -130,7 +130,7 @@ export class FirefoxThemeProcessor implements IThemeProcessor
                                 }
                                 if (mainVersion >= 59)
                                 {
-                                    Object.assign(theme.colors, {
+                                    Object.assign(theme.colors!, {
                                         frame: darkBgColor.color!,
                                         bookmark_text: lightTextColor.color,
                                         tab_background_text: darkTextColor.color!,
@@ -140,7 +140,7 @@ export class FirefoxThemeProcessor implements IThemeProcessor
                                 }
                                 if (mainVersion >= 60)
                                 {
-                                    Object.assign(theme.colors, {
+                                    Object.assign(theme.colors!, {
                                         button_background_hover: buttonHoverColor.color,
                                         button_background_active: buttonActiveColor.color,
 
@@ -156,14 +156,14 @@ export class FirefoxThemeProcessor implements IThemeProcessor
                                 }
                                 if (mainVersion >= 63)
                                 {
-                                    Object.assign(theme.colors, {
+                                    Object.assign(theme.colors!, {
                                         ntp_background: mainBgColor.color,
                                         ntp_text: mainTextColor.color
                                     });
                                 }
                                 if (mainVersion >= 64)
                                 {
-                                    Object.assign(theme.colors, {
+                                    Object.assign(theme.colors!, {
                                         sidebar: buttonColor.color,
                                         sidebar_highlight: buttonActiveColor.color,
                                         sidebar_highlight_text: activeTextColor.color,

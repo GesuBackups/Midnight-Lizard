@@ -1,6 +1,7 @@
 import { injectable } from "../Utils/DI";
 import { ISettingsBus } from "../Settings/ISettingsBus";
 import { IBaseSettingsManager } from "../Settings/BaseSettingsManager";
+import { IWindowManager } from "../Utils/IWindowManager";
 
 export abstract class IDocumentZoomObserver
 {
@@ -15,13 +16,14 @@ class DocumentZoomObserver implements IDocumentZoomObserver
 
     constructor(doc: Document,
         settingsBus: ISettingsBus,
-        private readonly _settingsManager: IBaseSettingsManager)
+        private readonly _settingsManager: IBaseSettingsManager,
+        private readonly _windowManager: IWindowManager)
     {
         settingsBus.onZoomChanged.addListener((done, zoom) =>
         {
             this.lastZoom = zoom || 1;
             this.setDocumentZoom(doc);
-            if (window.top === window.self)
+            if (this._windowManager.isMainWindow())
             {
                 done(true);
             }

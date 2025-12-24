@@ -1,4 +1,4 @@
-FROM node:10
+FROM node:24-alpine
 WORKDIR /build
 COPY ./package.json .
 RUN npm install

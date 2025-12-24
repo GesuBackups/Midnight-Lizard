@@ -11,6 +11,7 @@ import { ColorSchemes, ColorSchemeId, CustomColorSchemeId } from "../Settings/Co
 import { ComponentShift } from "../Colors/ComponentShift";
 import { ITranslationAccessor } from "../i18n/ITranslationAccessor";
 import { HtmlEvent } from '../Events/HtmlEvent';
+import { IWindowManager } from "../Utils/IWindowManager";
 
 type AnyResponse = (args: any) => void;
 type ColorSchemeResponse = (settings: ColorScheme) => void;
@@ -47,9 +48,10 @@ class SettingsManager extends BaseSettingsManager implements ISettingsManager
         settingsBus: ISettingsBus,
         matchPatternProcessor: IMatchPatternProcessor,
         i18n: ITranslationAccessor,
-        rec: IRecommendations)
+        rec: IRecommendations,
+        windowManager: IWindowManager)
     {
-        super(_rootDocument, app, storageManager, settingsBus, matchPatternProcessor, i18n, rec);
+        super(_rootDocument, app, storageManager, settingsBus, matchPatternProcessor, i18n, rec, windowManager);
         settingsBus.onCurrentSettingsRequested.addListener(this.onCurrentSettingsRequested, this);
         settingsBus.onIsEnabledToggleRequested.addListener(this.onIsEnabledToggleRequested, this);
         settingsBus.onNewSettingsApplicationRequested.addListener(this.onNewSettingsApplicationRequested, this);
@@ -85,7 +87,7 @@ class SettingsManager extends BaseSettingsManager implements ISettingsManager
                 .filter(h => h > this._curTime)
                 .reduce((next, h) => h < next ? h : next, 99) * 60 * 60 * 1000 +
                 today.getTime() - Date.now();
-            this._scheduleUpdateTimeout = window.setTimeout(() =>
+            this._scheduleUpdateTimeout = this._windowManager.setTimeout(() =>
             {
                 this.initCurrentSettings();
             }, millisecondsUntilNextSwitch);
@@ -130,7 +132,7 @@ class SettingsManager extends BaseSettingsManager implements ISettingsManager
 
     protected async onSettingsDeletionRequested(response: AnyResponse)
     {
-        if (window.top === window.self)
+        if (this._windowManager.isMainWindow())
         {
             response(null);
         }
@@ -204,10 +206,7 @@ class SettingsManager extends BaseSettingsManager implements ISettingsManager
     /** it is main frame or child frame w/o access to the main frame */
     protected get isSelfMaintainable()
     {
-        let hasAccessToMainFrame: boolean = true;
-        try { const test = window.top.location.hostname }
-        catch { hasAccessToMainFrame = false; }
-        return window.top === window.self || !hasAccessToMainFrame;
+        return this._windowManager.isMainWindow() || !this._windowManager.hasAccessToMainFrame();
     }
 
     protected async saveCurrentSettings()

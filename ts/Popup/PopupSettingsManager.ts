@@ -11,6 +11,7 @@ import { ISettingsBus } from "../Settings/ISettingsBus";
 import { IMatchPatternProcessor } from "../Settings/MatchPatternProcessor";
 import { IRecommendations } from "../Settings/Recommendations";
 import { ITranslationAccessor } from "../i18n/ITranslationAccessor";
+import { IWindowManager } from "../Utils/IWindowManager";
 
 type ArgEvent<TRequestArgs> = ArgumentedEvent<TRequestArgs>;
 type RespEvent<TResponseMethod extends Function, TRequestArgs> = ResponsiveEvent<TResponseMethod, TRequestArgs>;
@@ -33,16 +34,16 @@ export abstract class IPopupSettingsManager
     abstract getDefaultSettingsCache(): ColorScheme;
     abstract setAsDefaultSettings(): Promise<ColorScheme>;
     abstract changeDefaultSettings(settings: ColorScheme, changeUnderlyingColorScheme: boolean): Promise<ColorScheme>;
-    abstract toggleIsEnabled(isEnabled: boolean): Promise<null>;
+    abstract toggleIsEnabled(isEnabled: boolean): Promise<void>;
     abstract changeSettings(newSettings: ColorScheme): void;
     abstract applySettings(): Promise<ColorScheme>;
-    abstract deleteAllSettings(): Promise<null>;
-    abstract deleteCurrentSiteSettings(): Promise<null>;
-    abstract deleteAllWebsitesSettings(): Promise<null>;
-    abstract saveUserColorScheme(userColorScheme: ColorScheme): Promise<null>;
-    abstract deleteUserColorScheme(colorSchemeId: ColorSchemeId): Promise<null>;
+    abstract deleteAllSettings(): Promise<void>;
+    abstract deleteCurrentSiteSettings(): Promise<void>;
+    abstract deleteAllWebsitesSettings(): Promise<void>;
+    abstract saveUserColorScheme(userColorScheme: ColorScheme): Promise<void>;
+    abstract deleteUserColorScheme(colorSchemeId: ColorSchemeId): Promise<void>;
     abstract settingsAreEqual(first: ColorScheme, second: ColorScheme): boolean;
-    abstract toggleSync(value: boolean): Promise<null>;
+    abstract toggleSync(value: boolean): Promise<void>;
     abstract getCurrentSorage(): Promise<boolean>;
     abstract get currentTabIsAccessible(): boolean;
     abstract get currentSiteSettings(): ColorScheme;
@@ -67,9 +68,11 @@ class PopupSettingsManager extends BaseSettingsManager implements IPopupSettings
         settingsBus: ISettingsBus,
         matchPatternProcessor: IMatchPatternProcessor,
         i18n: ITranslationAccessor,
-        rec: IRecommendations)
+        rec: IRecommendations,
+        windowManager: IWindowManager
+    )
     {
-        super(rootDocument, app, storageManager, settingsBus, matchPatternProcessor, i18n, rec);
+        super(rootDocument, app, storageManager, settingsBus, matchPatternProcessor, i18n, rec, windowManager);
     }
 
     protected async initCurrentSettings()
@@ -77,7 +80,7 @@ class PopupSettingsManager extends BaseSettingsManager implements IPopupSettings
         try
         {
             let [currentSettings, defaultSettings] = await Promise.all([
-                this._settingsBus.getCurrentSettings().catch(ex => (this._app.isDebug && console.error(ex)) as never),
+                this._settingsBus.getCurrentSettings().catch((ex: any) => (this._app.isDebug && console.error(ex.message || ex)) as never),
                 this.getDefaultSettings()]);
             if (!currentSettings)
             {
@@ -120,7 +123,7 @@ class PopupSettingsManager extends BaseSettingsManager implements IPopupSettings
         return this._onSettingsInitializationFailed.event;
     }
 
-    public toggleIsEnabled(isEnabled: boolean): Promise<null>
+    public toggleIsEnabled(isEnabled: boolean): Promise<void>
     {
         this._currentSettings.isEnabled = isEnabled;
         this._settingsBus.toggleIsEnabled(isEnabled)
@@ -181,7 +184,7 @@ class PopupSettingsManager extends BaseSettingsManager implements IPopupSettings
             Object.keys(storage).filter(x => x.startsWith("ws:")));
     }
 
-    public toggleSync(value: boolean): Promise<null>
+    public toggleSync(value: boolean): Promise<void>
     {
         return this._storageManager.toggleSync(value);
     }

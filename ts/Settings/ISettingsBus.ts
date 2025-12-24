@@ -19,7 +19,7 @@ export abstract class ISettingsBus
     /** Occurs when tab zoom factor changes */
     abstract get onZoomChanged(): ResponsiveEvent<AnyResponse, number>;
     /** Deletes all current website settings from the cookies */
-    abstract deleteSettings(): Promise<null>;
+    abstract deleteSettings(): Promise<void>;
     /** Applies new settings on the website and saves them */
     abstract applySettings(settings: ColorScheme): Promise<ColorScheme>;
     /** Notify that settings has been applied on the page */

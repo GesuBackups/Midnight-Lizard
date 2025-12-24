@@ -1,7 +1,6 @@
 import { injectable } from "../Utils/DI";
 import { IApplicationSettings, BrowserName, BrowserVendor } from "../Settings/IApplicationSettings";
 import { StorageType, StorageLimits } from "../Settings/IStorageManager";
-import { ChromePromise } from "./ChromePromise";
 
 @injectable(IApplicationSettings)
 export class ChromeApplicationSettings implements IApplicationSettings
@@ -63,9 +62,7 @@ export class ChromeApplicationSettings implements IApplicationSettings
     get version() { return chrome.runtime.getManifest().version }
     get id() { return chrome.runtime.id }
 
-    constructor(
-        protected readonly _rootDocument: Document,
-        protected readonly _chrome: ChromePromise)
+    constructor(protected readonly _rootDocument: Document)
     {
         if (chrome.runtime.id === "pbnndmlekkboofhnbonilimejonapojg" || // chrome
             chrome.runtime.id === "{8fbc7259-8015-4172-9af1-20e1edfbbd3a}" || // firefox

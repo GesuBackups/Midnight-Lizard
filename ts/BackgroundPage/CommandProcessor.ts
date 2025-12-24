@@ -39,7 +39,7 @@ export class CommandProcessor implements ICommandProcessor
                     currentSettings.runOnThisSite = !currentSettings.runOnThisSite;
                     this._settingsBus.applySettings(currentSettings);
                 }
-                catch (ex)
+                catch (ex: any)
                 {
                     console.error("Current website toggle request to the tab faild with: " + ex.message || ex);
                 }

@@ -7,6 +7,8 @@ import { IThemeProcessor } from "./IThemeProcessor";
 import { IApplicationInstaller } from "./IApplicationInstaller";
 import { IExternalMessageProcessor } from "./ExternalMessageProcessor";
 import { ILocalMessageProcessor } from "./LocalMessageProcessor";
+import { WindowManagerStub } from "../Utils/WindowManagerStub";
+import { IWindowManager } from "../Utils/IWindowManager";
 
 // Manifest V3: Service workers don't have access to document
 // Provide a stub for compatibility
@@ -21,6 +23,13 @@ Container.register(CurrentExtensionModule, class
     {
         return new CurrentExtensionModule(
             ExtensionModule.BackgroundPage);
+    }
+});
+Container.register(IWindowManager, class
+{
+    constructor()
+    {
+        return new WindowManagerStub();
     }
 });
 

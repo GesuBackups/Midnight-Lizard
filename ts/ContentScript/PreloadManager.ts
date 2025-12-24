@@ -4,6 +4,7 @@ import { IBaseSettingsManager } from "../Settings/BaseSettingsManager";
 import { IApplicationSettings } from "../Settings/IApplicationSettings";
 import { EventHandlerPriority } from "../Events/Event";
 import { ComponentShift } from "../Colors/ComponentShift";
+import { IWindowManager } from "../Utils/IWindowManager";
 
 export abstract class IPreloadManager { }
 
@@ -22,7 +23,8 @@ class PreloadManager implements IPreloadManager
     constructor(doc: Document,
         private readonly _module: CurrentExtensionModule,
         protected readonly _settingsManager: IBaseSettingsManager,
-        protected readonly _app: IApplicationSettings)
+        protected readonly _app: IApplicationSettings,
+        protected readonly _windowManager: IWindowManager)
     {
         let localStorageIsAccessable = true;
         try
@@ -48,7 +50,7 @@ class PreloadManager implements IPreloadManager
     {
         if (localStorage.getItem(mlIsActiveProperty) === "true")
         {
-            this._html.setAttribute(mlViewAttribute, window.top === window.self ? "top" : "child");
+            this._html.setAttribute(mlViewAttribute, this._windowManager.isMainWindow() ? "top" : "child");
             this._html.setAttribute(mlIsActiveAttribute, "");
 
             const cachedMode = localStorage.getItem(mlModeProperty);

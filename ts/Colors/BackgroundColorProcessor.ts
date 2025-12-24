@@ -8,6 +8,7 @@ import { Component, ComponentShift } from "./ComponentShift";
 import { HslaColor } from "./HslaColor";
 import { RgbaColor } from "./RgbaColor";
 import { IDynamicSettingsManager } from "../Settings/DynamicSettingsManager";
+import { IWindowManager } from "../Utils/IWindowManager";
 
 export abstract class IBackgroundColorProcessor
 {
@@ -35,7 +36,8 @@ class BackgroundColorProcessor extends BaseColorProcessor implements IBackground
     constructor(
         app: IApplicationSettings,
         settingsManager: IBaseSettingsManager,
-        protected readonly highlightedBackgroundColorProcessor: IHighlightedBackgroundColorProcessor)
+        protected readonly highlightedBackgroundColorProcessor: IHighlightedBackgroundColorProcessor,
+        protected readonly windowManager: IWindowManager)
     {
         super(app, settingsManager);
         this._component = Component.Background;
@@ -215,7 +217,7 @@ class BackgroundColorProcessor extends BaseColorProcessor implements IBackground
             if (tag instanceof HTMLBodyElement && rgba.alpha === 0)
             {
                 rgbaString = "body-trans";
-                if (window.top === window.self)
+                if (this.windowManager.isMainWindow())
                 {
                     rgba = { red: 255, green: 255, blue: 255, alpha: 1 };
                 }
@@ -301,9 +303,10 @@ class SvgBackgroundColorProcessor extends BackgroundColorProcessor implements IS
 {
     constructor(
         app: IApplicationSettings,
-        settingsManager: IBaseSettingsManager)
+        settingsManager: IBaseSettingsManager,
+        windowManager: IWindowManager)
     {
-        super(app, settingsManager, null as any);
+        super(app, settingsManager, null as any, windowManager);
         this._component = Component.SvgBackground;
     }
 }
@@ -313,9 +316,10 @@ class TextSelectionColorProcessor extends BackgroundColorProcessor implements IT
 {
     constructor(
         app: IApplicationSettings,
-        settingsManager: IBaseSettingsManager)
+        settingsManager: IBaseSettingsManager,
+        windowManager: IWindowManager)
     {
-        super(app, settingsManager, null as any);
+        super(app, settingsManager, null as any, windowManager);
         this._component = Component.TextSelection;
     }
 }
@@ -325,9 +329,10 @@ class DynamicBackgroundColorProcessor extends BackgroundColorProcessor implement
 {
     constructor(
         app: IApplicationSettings,
-        settingsManager: IDynamicSettingsManager)
+        settingsManager: IDynamicSettingsManager,
+        windowManager: IWindowManager)
     {
-        super(app, settingsManager, null as any);
+        super(app, settingsManager, null as any, windowManager);
         this._component = Component.Background;
     }
 }
@@ -337,9 +342,10 @@ class DynamicTextSelectionColorProcessor extends TextSelectionColorProcessor imp
 {
     constructor(
         app: IApplicationSettings,
-        settingsManager: IDynamicSettingsManager)
+        settingsManager: IDynamicSettingsManager,
+        windowManager: IWindowManager)
     {
-        super(app, settingsManager);
+        super(app, settingsManager, windowManager);
         this._component = Component.TextSelection;
     }
 }

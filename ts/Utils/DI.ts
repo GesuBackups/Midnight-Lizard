@@ -1,4 +1,3 @@
-/// <reference path="../../node_modules/reflect-metadata/Reflect.d.ts" />
 import "reflect-metadata";
 
 type Prototype<T> = { prototype: T };

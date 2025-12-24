@@ -14,11 +14,11 @@ export enum StorageLimits
 
 export abstract class IStorageManager
 {
-    abstract set(obj: Object): Promise<null>;
-    abstract get<T>(key: T | null): Promise<T>;
-    abstract clear(): Promise<null>;
-    abstract remove(key: string | string[]): Promise<null>;
-    abstract toggleSync(value: boolean): Promise<null>;
+    abstract set(obj: Object): Promise<void>;
+    abstract get<T extends Object>(key: T | null): Promise<T>;
+    abstract clear(): Promise<void>;
+    abstract remove(key: string | string[]): Promise<void>;
+    abstract toggleSync(value: boolean): Promise<void>;
     abstract getCurrentStorage(): Promise<StorageType>;
     abstract get onStorageChanged(): ArgEvent<Partial<ColorScheme>>;
 }

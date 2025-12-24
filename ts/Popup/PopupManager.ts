@@ -27,6 +27,7 @@ import * as Slider from "../Controls/SliderControl";
 import { USP } from "../ContentScript/CssStyle";
 import { IColorToRgbaStringConverter } from "../Colors/ColorToRgbaStringConverter";
 import { HslaColor } from "../Colors/HslaColor";
+import { IWindowManager } from "../Utils/IWindowManager";
 
 const dom = HtmlEvent;
 const editMark = ColorSchemeNamePrefix.FromFile;
@@ -61,7 +62,7 @@ class PopupManager
     protected _openColorSchemesGeneratorButton!: HTMLButtonElement;
     protected _syncSettingsCheckBox!: HTMLInputElement;
     protected _settingsForm!: HTMLFormElement;
-    protected _lastMatchPatternChangeTimeout = 0;
+    protected _lastMatchPatternChangeTimeout: number | undefined = 0;
     protected get currentSiteSettings()
     {
         return this._settingsManager.currentSiteSettings;
@@ -84,7 +85,8 @@ class PopupManager
         protected readonly _i18n: ITranslationAccessor,
         protected readonly _rangeFillColorProcessor: IRangeFillColorProcessor,
         protected readonly _matchPatternProcessor: IMatchPatternProcessor,
-        private readonly _webColorConverter: IColorToRgbaStringConverter)
+        private readonly _webColorConverter: IColorToRgbaStringConverter,
+        private readonly _windowManager: IWindowManager)
     {
         dom.addEventListener(_popup, "DOMContentLoaded", this.popupContentloaded, this);
         dom.addEventListener(_popup.defaultView!, "resize", this.setPopupScale, this);
@@ -961,7 +963,7 @@ class PopupManager
         {
             clearTimeout(this._lastMatchPatternChangeTimeout);
         }
-        this._lastMatchPatternChangeTimeout = window.setTimeout(() =>
+        this._lastMatchPatternChangeTimeout = this._windowManager.setTimeout(() =>
         {
             this.onInputFieldChanged();
         }, this._inputChangeDebounceTime);

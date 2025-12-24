@@ -10,7 +10,7 @@ import { injectable } from "../Utils/DI";
 import { ISettingsBus } from "../Settings/ISettingsBus";
 import { IApplicationSettings } from "../Settings/IApplicationSettings";
 import { CurrentExtensionModule, ExtensionModule } from "../Settings/ExtensionModule";
-import { ChromePromise } from "./ChromePromise";
+import { IWindowManager } from "../Utils/IWindowManager";
 
 type ColorSchemeResponse = (settings: ColorScheme) => void;
 type AnyResponse = (args: any) => void;
@@ -23,9 +23,9 @@ export class ChromeSettingsBus implements ISettingsBus
 {
     constructor(
         protected readonly _app: IApplicationSettings,
-        protected readonly _chromePromise: ChromePromise,
         protected readonly _document: Document,
-        protected readonly _module: CurrentExtensionModule)
+        protected readonly _module: CurrentExtensionModule,
+        protected readonly _windowManager: IWindowManager)
     {
         chrome.runtime.onMessage.addListener(
             (request: MessageTypes, sender, sendResponse) =>
@@ -33,7 +33,7 @@ export class ChromeSettingsBus implements ISettingsBus
                 if (this._app.isDebug)
                 {
                     request.receiver = _module.name + " - " +
-                        (window.top === window.self ? "Main frame" : "Child frame");
+                        (this._windowManager.isMainWindow() ? "Main frame" : "Child frame");
                     console.log(request);
                 }
                 // requests from popup window or background page
@@ -41,7 +41,7 @@ export class ChromeSettingsBus implements ISettingsBus
                     request.sender === ExtensionModule.BackgroundPage)
                 {
                     // actions only for content scripts in top frame
-                    if (window.top === window.self)
+                    if (this._windowManager.isMainWindow())
                     {
                         switch (request.action)
                         {
@@ -131,30 +131,30 @@ export class ChromeSettingsBus implements ISettingsBus
 
     protected sendMessage<TResult>(msg: MessageTypes)
     {
-        return this._chromePromise.runtime.sendMessage<TResult>(msg);
+        return chrome.runtime.sendMessage<MessageTypes, TResult>(msg);
     }
 
     protected sendMessageToSelectedTab<TResult>(msg: MessageTypes)
     {
-        return this._chromePromise.tabs.query({ active: true, currentWindow: true })
+        return chrome.tabs.query({ active: true, currentWindow: true })
             .then(tabs =>
-                this._chromePromise.tabs.sendMessage<TResult>(tabs[0].id!, msg));
+                chrome.tabs.sendMessage<MessageTypes, TResult>(tabs[0].id!, msg));
     }
 
     protected sendMessageToAllTabs<TResult>(msg: MessageTypes)
     {
-        return this._chromePromise.tabs.query({}).then(tabs => tabs.map(
-            tab => this._chromePromise.tabs.sendMessage<TResult>(tab.id!, msg)));
+        return chrome.tabs.query({}).then(tabs => tabs.map(
+            tab => chrome.tabs.sendMessage<MessageTypes, TResult>(tab.id!, msg)));
     }
 
     protected sendMessageToTab<TResult>(tabId: number, msg: MessageTypes)
     {
-        return this._chromePromise.tabs.sendMessage<TResult>(tabId, msg);
+        return chrome.tabs.sendMessage<MessageTypes, TResult>(tabId, msg);
     }
 
     public deleteSettings()
     {
-        return this.sendMessageToSelectedTab<null>(
+        return this.sendMessageToSelectedTab<void>(
             new SettingsDeletionRequestMessage(
                 this._module.name));
     }
@@ -191,7 +191,7 @@ export class ChromeSettingsBus implements ISettingsBus
 
     public notifySettingsApplied(settings: ColorScheme)
     {
-        if (window.top === window.self)
+        if (this._windowManager.isMainWindow())
         {
             return this.sendMessage<ColorScheme>(
                 new SettingsAppliedMessage(

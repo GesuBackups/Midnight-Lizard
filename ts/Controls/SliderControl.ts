@@ -1,4 +1,4 @@
-let lastAttempt: number;
+let lastAttempt: NodeJS.Timeout;
 
 export function initSliders(doc: Document)
 {

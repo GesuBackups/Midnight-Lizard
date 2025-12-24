@@ -1,7 +1,6 @@
 import { injectable } from "../Utils/DI";
 import { IApplicationInstaller } from "../BackgroundPage/IApplicationInstaller";
 import { IApplicationSettings, BrowserName } from "../Settings/IApplicationSettings";
-import { ChromePromise } from "./ChromePromise";
 
 @injectable(IApplicationInstaller)
 export class ChromeApplicationInstaller implements IApplicationInstaller
@@ -9,7 +8,6 @@ export class ChromeApplicationInstaller implements IApplicationInstaller
     private readonly printError = (er: any) => this._app.isDebug && console.error(er.message || er);
 
     constructor(
-        protected readonly _chromePromise: ChromePromise,
         protected readonly _app: IApplicationSettings)
     {
         if (_app.browserName !== BrowserName.Firefox)
@@ -23,30 +21,27 @@ export class ChromeApplicationInstaller implements IApplicationInstaller
         setTimeout(() =>
         {
             const mainInjection = chrome.runtime.getManifest().content_scripts![0];
-            this._chromePromise.tabs
+            chrome.tabs
                 .query({})
-                .then(tabs => tabs.map(tab =>
+                .then(tabs =>
                 {
-                    for (const css of mainInjection.css!)
+                    for (const tab of tabs)
                     {
-                        this._chromePromise.tabs
-                            .insertCSS(tab.id!, {
-                                allFrames: true,
-                                matchAboutBlank: true,
-                                runAt: mainInjection.run_at,
-                                file: css
-                            })
-                            .catch(this.printError);
-                    }
-                    this._chromePromise.tabs
-                        .executeScript(tab.id!, {
-                            allFrames: true,
-                            matchAboutBlank: true,
-                            runAt: "document_idle",
-                            file: mainInjection.js![0]
+                        if (!tab.id || !tab.url || tab.url?.startsWith("chrome://")) { continue; }
+
+                        chrome.scripting.insertCSS({
+                            target: { tabId: tab.id!, allFrames: true },
+                            files: mainInjection.css!
                         })
                         .catch(this.printError);
-                }))
+
+                        chrome.scripting.executeScript({
+                            target: { tabId: tab.id!, allFrames: true },
+                            files: [mainInjection.js![0]]
+                        })
+                        .catch(this.printError);
+                    }
+                })
                 .catch(this.printError);
         }, this._app.isDebug ? 3000 : 100);
     }

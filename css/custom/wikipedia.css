@@ -1,89 +1,25 @@
-html[ml-mode]:not([ml-mode="filter"]) #p-logo {
-  position: relative;
+html[ml-is-active] input:hover + #vector-main-menu-dropdown-label,
+html[ml-is-active] input:hover + #p-lang-btn-label,
+html[ml-is-active] input:hover + #vector-page-tools-dropdown-label {
+    background-color: var(--ml-main-button-background-color)!important;
+    --ml-ignore:true;
 }
 
-html[ml-mode][ml-mode="filter"] #p-logo {
-  --ml-ignore:true;
-}
-
-html[ml-mode]:not([ml-mode="filter"]) #p-logo:before {
-  content: "";
-  background-color: #f0f0f0;
-  position: absolute;
-  bottom: 3px;
-  left: 0px;
-  right: 0px;
-  height: 45px;
-  z-index: 999;
-}
-html[ml-stage-mode]:not([ml-mode="filter"]):not([ml-stage-mode="complete-complex"]) #p-logo:not(#imp):not(.imp):not(imp):before{
-  background-color: var(--ml-main-background-color)!important;
-}
-
-html[ml-mode]:not([ml-mode="filter"]) #p-logo:after {
-  --ml-ignore:true;
-  content: "";
-  background-repeat: no-repeat;
-  background-position: bottom;
-  background-image: url(https://__MSG_short_locale__.wikipedia.org/static/images/project-logos/__MSG_short_locale__wiki.png);
-  position: absolute;
-  bottom: 3px;
-  left: 0px;
-  right: 0px;
-  height: 45px;
-  z-index: 999;
-  filter: var(--ml-text-filter);
-}
-
-@media (-webkit-min-device-pixel-ratio: 1.5),
-(min--moz-device-pixel-ratio:1.5),
-(min-resolution:1.5dppx),
-(min-resolution:144dpi) {
-  html[ml-mode]:not([ml-mode="filter"]) #p-logo:after {
-      background-image: url(https://__MSG_short_locale__.wikipedia.org/static/images/project-logos/__MSG_short_locale__wiki-1.5x.png);
-      background-size: 135px auto
-    }
-}
-
-@media (-webkit-min-device-pixel-ratio: 2),
-(min--moz-device-pixel-ratio:2),
-(min-resolution:2dppx),
-(min-resolution:192dpi) {
-  html[ml-mode]:not([ml-mode="filter"]) #p-logo:after {
-      background-image: url(https://__MSG_short_locale__.wikipedia.org/static/images/project-logos/__MSG_short_locale__wiki-2x.png);
-      background-size: 135px auto
-    }
-}
-
-html[ml-mode]:not([ml-mode="filter"]) div.vectorTabs li.selected:not(imp) {
-  background-image: none;
-  background-color: white;
-}
-
-html[ml-mode]:not([ml-mode="filter"]) div.vectorTabs ul li:not(imp) {
-  background-image: -webkit-linear-gradient(white 0%, #eaf2f8 98%, #a7d7f9 99%);
-}
-
-html[ml-mode]:not([ml-mode="filter"]) #mw-page-base:not(imp) {
-  background-image: linear-gradient(#ffffff 50%, #f2f2f2 100%);
-}
-
-html[ml-mode]:not([ml-mode="filter"]) body:not(imp) {
-  background-color: #f0f0f0;
-}
-
-html[ml-mode]:not([ml-mode="filter"]) .mwe-math-fallback-image-inline,
-html[ml-stage-mode]:not([ml-mode="filter"]):not([ml-stage-mode="complete-complex"]) span.mwe-math-element:not(#imp):not(.imp):not(imp)>img[src].mwe-math-fallback-image-inline:not(#imp):not(.imp):not(imp):not(#imp) {
+html[ml-is-active] .vector-icon.mw-ui-icon-wikimedia-menu,
+html[ml-is-active] img.mw-logo-wordmark:not(impt):not(.ml-ignore):not(#impt),
+html[ml-is-active] img.mw-logo-tagline:not(impt):not(.ml-ignore):not(#impt),
+html[ml-is-active] .cdx-search-input .cdx-text-input__icon.cdx-text-input__start-icon,
+html[ml-is-active] .mw-ui-icon-wikimedia-expand,
+html[ml-is-active] .vector-icon,
+html[ml-is-active] .vector-dropdown .vector-dropdown-label:not(.cdx-button--icon-only)::after {
   --ml-ignore:true;
   filter: var(--ml-text-filter)!important;
 }
 
-html[ml-mode]:not([ml-mode="filter"]) #simpleSearch {
-  background-image: none !important;
+.vector-page-titlebar::after {
+  --ml-background-background-color:Text;
 }
 
-html[ml-stage-mode]:not([ml-mode="filter"]) .magnify:not(#imp)>a:not(#imp) {
-  --ml-ignore:true;
-  filter: var(--ml-text-filter);
-  background-color: transparent!important;
+html[ml-is-active][ml-mode="simple"] .vector-sticky-pinned-container::after{
+  background: transparent!important;
 }

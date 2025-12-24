@@ -47,6 +47,7 @@ import
     ProcessingOrder, normalDelays, smallReCalculationDelays, onCopyReCalculationDelays,
     bigReCalculationDelays
 } from "./ProcessingOrder";
+import { IWindowManager } from "../Utils/IWindowManager";
 
 let chunkLength = 300;
 let minChunkableLength = 700;
@@ -158,8 +159,8 @@ class DocumentProcessor implements IDocumentProcessor
         protected readonly _zoomObserver: IDocumentZoomObserver,
         protected readonly _svgFilters: ISvgFilters,
         protected readonly _backgroundImageProcessor: IBackgroundImageProcessor,
-        protected readonly _noneColorProcessor: INoneColorProcessor)
-    {
+        protected readonly _noneColorProcessor: INoneColorProcessor,
+        protected readonly _windowManager: IWindowManager) {
         if (_module.name === ExtensionModule.PopupWindow)
         {
             chunkLength = 250;
@@ -239,7 +240,7 @@ class DocumentProcessor implements IDocumentProcessor
             this.injectDynamicValues(this._rootDocument);
             this.processRootDocument();
         }
-        if (window.top === window.self)
+        if (this._windowManager.isMainWindow())
         {
             response(this._settingsManager.currentSettings);
         }
@@ -345,7 +346,7 @@ class DocumentProcessor implements IDocumentProcessor
             {
                 html.setAttribute("ml-update", UpdateStage.Aware);
                 html.setAttribute("ml-stage", stage);
-                html.setAttribute("ml-view", window.top === window.self ? "top" : "child");
+                html.setAttribute("ml-view", this._windowManager.isMainWindow() ? "top" : "child");
                 if (this._settingsManager.isActive)
                 {
                     if (this._rootDocument.body && this._rootDocument.body.childElementCount === 1)
@@ -1097,7 +1098,7 @@ class DocumentProcessor implements IDocumentProcessor
                             tag.mlColor.intendedColor && tag.mlComputedStyle &&
                             tag.mlColor.intendedColor !== (tag instanceof HTMLElement
                                 ? tag.mlComputedStyle!.color
-                                : tag!.mlComputedStyle!.fill));
+                                : (tag as any).mlComputedStyle!.fill));
 
                         if (brokenColorTags.length > 0)
                         {
@@ -1178,7 +1179,7 @@ class DocumentProcessor implements IDocumentProcessor
             tag.mlColor.intendedColor && tag.mlComputedStyle &&
             tag.mlColor.intendedColor !== (tag instanceof HTMLElement
                 ? tag.mlComputedStyle!.color
-                : tag!.mlComputedStyle!.fill)).map(tag =>
+                : (tag as any).mlComputedStyle!.fill)).map(tag =>
                 {
                     const newColor = Object.assign({}, tag.mlColor!);
                     newColor.base = docProc._app.isDebug ? tag.mlColor : null
@@ -2456,7 +2457,7 @@ class DocumentProcessor implements IDocumentProcessor
                     mainColor.light = newColor.light;
                 }
             });
-            mainColor && (mainColor!.light = lightSum / uniqColors.size);
+            mainColor && ((mainColor as any).light = lightSum / uniqColors.size);
         }
         return new BackgroundImage(gradient, BackgroundImageType.Gradient);
     }

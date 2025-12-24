@@ -32,11 +32,11 @@ export class LocalMessageProcessor implements ILocalMessageProcessor
                     case MessageType.FetchImage: {
                         try
                         {
-                            const image = await this.fetcher.fetchImage(message.url, message.maxSize);
+                            const imageDataUrl = await this.fetcher.fetchImageDataUrl(message.url, message.maxSize);
                             this.messageBus.postMessage(port,
-                                new ImageFetchCompleted(message.url, image));
+                                new ImageFetchCompleted(message.url, imageDataUrl));
                         }
-                        catch (ex)
+                        catch (ex: any)
                         {
                             this.messageBus.postMessage(port,
                                 new ImageFetchFailed(message.url, ex.message || ex));
@@ -51,7 +51,7 @@ export class LocalMessageProcessor implements ILocalMessageProcessor
                             this.messageBus.postMessage(port,
                                 new ExternalCssFetchCompleted(message.url, cssText));
                         }
-                        catch (ex)
+                        catch (ex: any)
                         {
                             this.messageBus.postMessage(port,
                                 new ExternalCssFetchFailed(message.url, ex.message || ex));
@@ -62,7 +62,7 @@ export class LocalMessageProcessor implements ILocalMessageProcessor
                         break;
                 }
             }
-            catch (error)
+            catch (error: any)
             {
                 this.messageBus.postMessage(port,
                     new ErrorMessage("Local message processing failed", {

@@ -118,6 +118,10 @@ html[ml-mode]:not([ml-mode="filter"]) ytd-searchbox[mode=legacy-centered] #conta
     box-shadow: none!important;
 }
 
+#cinematics canvas {
+    --ml-ignore:true;
+}
+
 #endpoint.yt-simple-endpoint.ytd-guide-entry-renderer:not(imp) {
     --ml-link-color:Text;
     --ml-visitedlink-color:Text;

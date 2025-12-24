@@ -7,7 +7,7 @@ import { IBaseSettingsManager } from "../Settings/BaseSettingsManager";
 import { EventHandlerPriority } from "../Events/Event";
 import { ColorScheme } from "../Settings/ColorScheme";
 import { ComponentShift } from "../Colors/ComponentShift";
-import { LocalMessageToContent, MessageType, FetchImage } from "../Settings/Messages";
+import { LocalMessageToContent, MessageType, FetchImage, ImageFetchFailed } from "../Settings/Messages";
 import { trim } from "../Utils/String";
 import { FilterType } from "./SvgFilters";
 
@@ -51,7 +51,7 @@ class BackgroundImageProcessor implements IBackgroundImageProcessor
                     const imageJson = sessionStorage.getItem(storageKey);
                     if (imageJson)
                     {
-                        this._images.set(storageKey.substr(this._storagePrefix.length), JSON.parse(imageJson));
+                        this._images.set(storageKey.substring(this._storagePrefix.length), JSON.parse(imageJson));
                     }
                 }
             }
@@ -94,14 +94,17 @@ class BackgroundImageProcessor implements IBackgroundImageProcessor
             {
                 case MessageType.ImageFetchCompleted:
                     const resolve = this._imageResolvers.get(message.url + this._imageSizeLimit);
-                    resolve && resolve(message.img);
+                    if(resolve)
+                    {
+                        let img = new Image();
+                        img.onload = () => resolve({ d: message.dataUrl, w: img.naturalWidth, h: img.naturalHeight });
+                        img.onerror = (e: any) => this.OnImageFetchRejected(new ImageFetchFailed(message.url, e.message || e));
+                        img.src = message.dataUrl;
+                    }
                     break;
 
                 case MessageType.ImageFetchFailed:
-                    const reject = this._imageRejectors.get(message.url + this._imageSizeLimit);
-                    reject && reject(message.error);
-                    this._imageRejectors.delete(message.url + this._imageSizeLimit);
-                    this._imageResolvers.delete(message.url + this._imageSizeLimit);
+                    this.OnImageFetchRejected(message);
                     break;
 
                 case MessageType.ErrorMessage:
@@ -115,6 +118,14 @@ class BackgroundImageProcessor implements IBackgroundImageProcessor
                     break;
             }
         }
+    }
+
+    private OnImageFetchRejected(message: ImageFetchFailed)
+    {
+        const reject = this._imageRejectors.get(message.url + this._imageSizeLimit);
+        reject && reject(message.error);
+        this._imageRejectors.delete(message.url + this._imageSizeLimit);
+        this._imageResolvers.delete(message.url + this._imageSizeLimit);
     }
 
     private save(url: string, img: BackgroundImageCache): void
@@ -140,7 +151,7 @@ class BackgroundImageProcessor implements IBackgroundImageProcessor
 
     public process(url: string, bgFilter: string, blueFilter: number, roomRules: RoomRules)
     {
-        url = this.getAbsoluteUrl(trim(url.substr(3), "()'\""));
+        url = this.getAbsoluteUrl(trim(url.substring(3), "()'\""));
 
         const bgFltr = bgFilter.replace(`var(--${FilterType.BlueFilter})`, `url(#${FilterType.BlueFilter})`);
 
@@ -187,13 +198,6 @@ class BackgroundImageProcessor implements IBackgroundImageProcessor
             "url('data:image/svg+xml," + encodeURIComponent(svgImg)
                 .replace(/'/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29") +
             "')", BackgroundImageType.Image);
-
-        // // looks like with blob + objectUrl it works much slower
-        // const blob = new Blob([svgImg], { type: 'image/svg+xml' });
-        // const objectUrl = URL.createObjectURL(blob);
-        // return new BackgroundImage(
-        //     /^(auto\s?){1,2}$/i.test(bgSize) ? imgWidth + " " + imgHeight : bgSize,
-        //     `url(${objectUrl})`, BackgroundImageType.Image);
     }
 
     private getAbsoluteUrl(relativeUrl: string): string

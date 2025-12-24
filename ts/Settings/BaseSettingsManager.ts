@@ -14,6 +14,7 @@ import { IMatchPatternProcessor } from "./MatchPatternProcessor";
 import { ITranslationAccessor } from "../i18n/ITranslationAccessor";
 import { IRecommendations } from "./Recommendations";
 import { isNum } from "../Utils/TypeGuards";
+import { IWindowManager } from "../Utils/IWindowManager";
 
 type ArgEvent<TRequestArgs> = ArgumentedEvent<TRequestArgs>;
 type RespEvent<TResponseMethod extends Function, TRequestArgs> = ResponsiveEvent<TResponseMethod, TRequestArgs>;
@@ -132,20 +133,11 @@ export abstract class BaseSettingsManager implements IBaseSettingsManager
         protected readonly _settingsBus: ISettingsBus,
         protected readonly _matchPatternProcessor: IMatchPatternProcessor,
         protected readonly _i18n: ITranslationAccessor,
-        private readonly _recommendations: IRecommendations)
+        private readonly _recommendations: IRecommendations,
+        protected readonly _windowManager: IWindowManager)
     {
-        let hostName: string;
-        try
-        {
-            hostName = window.top.location.hostname;
-            this._rootUrl = window.top.location.href;
-        }
-        catch
-        {
-            hostName = _rootDocument.location!.hostname;
-            this._rootUrl = _rootDocument.location!.href;
-        }
-        this._settingsKey = `ws:${hostName}`; //`
+        this._rootUrl = _windowManager.getCurrentWindowUrl();
+        this._settingsKey = `ws:${_windowManager.getCurrentWindowHostname()}`;
         this.onSettingsInitialized.addListener(shift => this.isInit = true, this);
         this.initDefaultColorSchemes();
         this._defaultSettings = { ...ColorSchemes.default, ...ColorSchemes.dimmedDust };
@@ -553,14 +545,22 @@ export abstract class BaseSettingsManager implements IBaseSettingsManager
 
     protected PrefersDarkColorSchemeMediaMatch()
     {
-        return window.matchMedia("(prefers-color-scheme: dark)");
+        return this._windowManager.matchMedia("(prefers-color-scheme: dark)");
     }
 
     protected notifySettingsApplied()
     {
         this._settingsBus.notifySettingsApplied(this._currentSettings)
-            .catch(ex => this._app.isDebug &&
-                console.error((`Error in ${window.top === window.self ? "top" : "child"} frame:\n${ex.message || ex}`)));
+            .catch(ex =>
+            {
+                if (!this._app.isDebug) return;
+                let context = "worker";
+                if (this._windowManager.hasAccessToMainFrame())
+                {
+                    context = this._windowManager.isMainWindow() ? "top" : "child";
+                }
+                console.error(`Error in ${context} frame:\n${ex.message || ex}`);
+            });
     }
 
     protected _onSettingsInitialized = new ArgEventDispatcher<ComponentShift>();
@@ -676,7 +676,7 @@ export abstract class BaseSettingsManager implements IBaseSettingsManager
         this.renameSettingsToDefault(ColorSchemes.default);
     }
 
-    public async saveUserColorScheme(userColorScheme: ColorScheme): Promise<null>
+    public async saveUserColorScheme(userColorScheme: ColorScheme): Promise<void>
     {
         const storage = await this._storageManager
             .get<PartialColorScheme>({
@@ -708,7 +708,7 @@ export abstract class BaseSettingsManager implements IBaseSettingsManager
         (storage as any)[`cs:${userColorScheme.colorSchemeId}`] = userColorScheme;
     }
 
-    public async deleteUserColorScheme(colorSchemeId: ColorSchemeId): Promise<null>
+    public async deleteUserColorScheme(colorSchemeId: ColorSchemeId): Promise<void>
     {
         const storage = await this._storageManager
             .get<PartialColorScheme>({

@@ -3,7 +3,6 @@ import { injectable } from "../Utils/DI";
 import { IStorageManager, StorageType } from "../Settings/IStorageManager";
 import { IApplicationSettings } from "../Settings/IApplicationSettings";
 import { ColorScheme } from "../Settings/ColorScheme";
-import { ChromePromise } from "./ChromePromise";
 import { ITranslationAccessor } from "../i18n/ITranslationAccessor";
 
 const ArgEventDispatcher = ArgumentedEventDispatcher;
@@ -13,7 +12,7 @@ export class ChromeStorageManager implements IStorageManager
 {
     private currentStorage?: StorageType;
 
-    constructor(readonly chromePromise: ChromePromise,
+    constructor(
         protected readonly _app: IApplicationSettings,
         protected readonly _i18n: ITranslationAccessor)
     {
@@ -27,31 +26,31 @@ export class ChromeStorageManager implements IStorageManager
         });
     }
 
-    set(obj: Object)
+    set(obj: Object): Promise<void>
     {
         return this.getCurrentStorage()
-            .then(storage => this.chromePromise.storage[storage].set(obj));
+            .then(storage => chrome.storage[storage].set(obj));
     }
 
     get<T extends Object>(key: T | null)
     {
         return this.getCurrentStorage()
-            .then(storage => this.chromePromise.storage[storage].get(key) as Promise<T>);
+            .then(storage => chrome.storage[storage].get(key) as Promise<T>);
     }
 
-    clear()
+    clear(): Promise<void>
     {
         return this.getCurrentStorage()
-            .then(storage => this.chromePromise.storage[storage].clear());
+            .then(storage => chrome.storage[storage].clear());
     }
 
-    remove(key: string | string[]): Promise<null>
+    remove(key: string | string[]): Promise<void>
     {
         return this.getCurrentStorage()
-            .then(storage => this.chromePromise.storage[storage].remove(key));
+            .then(storage => chrome.storage[storage].remove(key));
     }
 
-    async toggleSync(value: boolean): Promise<null>
+    async toggleSync(value: boolean): Promise<void>
     {
         const newStorage = value ? "sync" : "local";
         const currStorage = await this.getCurrentStorage();
@@ -60,17 +59,17 @@ export class ChromeStorageManager implements IStorageManager
             await this.transferStorage(currStorage, newStorage);
             this.currentStorage = newStorage;
         }
-        return this.chromePromise.storage.local.set({ sync: value });
+        return chrome.storage.local.set({ sync: value });
     }
 
     protected async transferStorage(from: StorageType, to: StorageType)
     {
-        const newStorageContent = await this.chromePromise.storage[to].get(null);
+        const newStorageContent = await chrome.storage[to].get(null);
         if (!newStorageContent || Object.keys(newStorageContent).length === 0 ||
             confirm(this._i18n.getMessage(`${to}StorageOverrideConfirmationMessage`)))
         {
-            this.chromePromise.storage[to].set(
-                await this.chromePromise.storage[from].get(null));
+            chrome.storage[to].set(
+                await chrome.storage[from].get(null));
         }
     }
 
@@ -82,7 +81,7 @@ export class ChromeStorageManager implements IStorageManager
         }
         else
         {
-            const state = await this.chromePromise.storage.local.get({ sync: !this._app.isDebug });
+            const state = await chrome.storage.local.get({ sync: !this._app.isDebug });
             this.currentStorage = state.sync ? "sync" : "local"
             return this.currentStorage;
         }

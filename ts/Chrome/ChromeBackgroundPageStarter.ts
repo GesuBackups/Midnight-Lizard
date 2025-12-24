@@ -1,4 +1,3 @@
-
 import { ChromeApplicationInstaller } from "./ChromeApplicationInstaller";
 import { ChromeStorageManager } from "./ChromeStorageManager";
 import { ChromeCommandListener } from "./ChromeCommandListener";

@@ -7,6 +7,7 @@ import { ISettingsBus } from "./ISettingsBus";
 import { IMatchPatternProcessor } from "./MatchPatternProcessor";
 import { IRecommendations } from "./Recommendations";
 import { ITranslationAccessor } from "../i18n/ITranslationAccessor";
+import { IWindowManager } from "../Utils/IWindowManager";
 
 export abstract class IDynamicSettingsManager extends IBaseSettingsManager
 {
@@ -22,9 +23,11 @@ class DynamicSettingsManager extends BaseSettingsManager implements IDynamicSett
         settingsBus: ISettingsBus,
         matchPatternProcessor: IMatchPatternProcessor,
         i18n: ITranslationAccessor,
-        rec: IRecommendations)
+        rec: IRecommendations,
+        windowManager: IWindowManager
+    )
     {
-        super(rootDocument, app, storageManager, settingsBus, matchPatternProcessor, i18n, rec);
+        super(rootDocument, app, storageManager, settingsBus, matchPatternProcessor, i18n, rec, windowManager);
         this.isInit = true
     }
 

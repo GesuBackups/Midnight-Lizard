@@ -116,7 +116,7 @@ export class PageScriptLoaded
 export class ImageFetchCompleted
 {
     readonly type = MessageType.ImageFetchCompleted;
-    constructor(readonly url: string, readonly img: BackgroundImageCache) { }
+    constructor(readonly url: string, readonly dataUrl: string) { }
 }
 
 export class ImageFetchFailed

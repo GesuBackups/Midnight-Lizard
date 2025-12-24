@@ -69,7 +69,7 @@ export class ExternalMessageProcessor implements IExternalMessageProcessor
                         break;
                 }
             }
-            catch (error)
+            catch (error: any)
             {
                 this.messageBus.postMessage(port,
                     new ErrorMessage("Midnight Lizard extension failed", {
